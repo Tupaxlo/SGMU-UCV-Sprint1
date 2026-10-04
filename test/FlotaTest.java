@@ -1,3 +1,5 @@
+package test;
+
 import modelo.Vehiculo;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
@@ -30,6 +32,6 @@ public class FlotaTest {
         bus.setEstado("En Mantenimiento");
 
         // Verificación (Then)
-        assertEquals("En Mantenimiento", bus.getEstado(), "El estado del vehículo debió cambiar a En Mantenimiento");
+        assertEquals("En Mantenimiento", bus.getEstado(), "El estado del vehículo debió cambiar");
     }
 }
