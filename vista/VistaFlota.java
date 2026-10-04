@@ -14,14 +14,12 @@ public class VistaFlota extends JFrame {
     public VistaFlota() {
         flota = new ArrayList<>();
         
-        // Configuración básica de la ventana
         setTitle("Backoffice - Gestión de Flota SGMU-UCV");
         setSize(600, 450);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLayout(new BorderLayout(10, 10));
         setLocationRelativeTo(null); // Centrar en pantalla
 
-        // Panel superior: Formulario de Registro
         JPanel panelFormulario = new JPanel(new GridLayout(5, 2, 10, 10));
         panelFormulario.setBorder(BorderFactory.createTitledBorder("Registrar Nuevo Vehículo"));
 
@@ -48,20 +46,17 @@ public class VistaFlota extends JFrame {
 
         add(panelFormulario, BorderLayout.NORTH);
 
-        // Panel central: Tabla para mostrar los vehículos
         String[] columnas = {"Placa", "Modelo", "Capacidad", "Estado"};
         modeloTabla = new DefaultTableModel(columnas, 0);
         JTable tablaFlota = new JTable(modeloTabla);
         add(new JScrollPane(tablaFlota), BorderLayout.CENTER);
 
-        // Lógica del botón "Registrar Vehículo"
         btnRegistrar.addActionListener(e -> {
             String placa = txtPlaca.getText().trim();
             String modelo = txtModelo.getText().trim();
             String capStr = txtCapacidad.getText().trim();
             String estado = (String) cbEstado.getSelectedItem();
 
-            // Validación de campos vacíos
             if (placa.isEmpty() || modelo.isEmpty() || capStr.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Por favor, llene todos los campos.", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
@@ -74,10 +69,8 @@ public class VistaFlota extends JFrame {
                 Vehiculo nuevoVehiculo = new Vehiculo(placa, modelo, capacidad, estado);
                 flota.add(nuevoVehiculo);
                 
-                // Agregar el vehículo a la tabla visual
                 modeloTabla.addRow(new Object[]{placa, modelo, capacidad, estado});
                 
-                // Limpiar el formulario
                 txtPlaca.setText("");
                 txtModelo.setText("");
                 txtCapacidad.setText("");
@@ -89,7 +82,6 @@ public class VistaFlota extends JFrame {
         });
     }
 
-    // Método main para probar esta pantalla de forma independiente
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             new VistaFlota().setVisible(true);

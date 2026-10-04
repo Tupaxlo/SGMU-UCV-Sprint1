@@ -27,7 +27,6 @@ public class VistaItinerario extends JFrame {
         setLocationRelativeTo(null);
         setLayout(new BorderLayout(10, 10));
 
-        // Panel Superior (Formulario)
         JPanel panelFormulario = new JPanel(new GridLayout(6, 2, 5, 5));
         panelFormulario.setBorder(BorderFactory.createTitledBorder("Registrar Nuevo Itinerario"));
 
@@ -57,12 +56,10 @@ public class VistaItinerario extends JFrame {
 
         add(panelFormulario, BorderLayout.NORTH);
 
-        // Panel Central (Tabla)
         modeloTabla = new DefaultTableModel(new String[]{"ID", "Ruta", "Fecha", "Hora", "Vehículo (Placa)"}, 0);
         JTable tablaItinerarios = new JTable(modeloTabla);
         add(new JScrollPane(tablaItinerarios), BorderLayout.CENTER);
 
-        // Acción del botón
         btnRegistrar.addActionListener(e -> registrarItinerario());
     }
 
@@ -78,14 +75,11 @@ public class VistaItinerario extends JFrame {
             return;
         }
 
-        // Creamos un vehículo temporal con la placa indicada para asociarlo al itinerario
         Vehiculo vehiculoTemp = new Vehiculo(placaVehiculo, "Modelo Genérico", 30, "Activo");
 
-        // Usamos el constructor real de tu clase Itinerario
         Itinerario nuevoItinerario = new Itinerario(id, ruta, fecha, hora, vehiculoTemp);
         listaItinerarios.add(nuevoItinerario);
 
-        // Agregar a la tabla visual
         modeloTabla.addRow(new Object[]{
             nuevoItinerario.getId(), 
             nuevoItinerario.getRuta(), 
@@ -94,7 +88,6 @@ public class VistaItinerario extends JFrame {
             nuevoItinerario.getVehiculoAsignado().getPlaca()
         });
 
-        // Limpiar campos
         txtId.setText("");
         txtRuta.setText("");
         txtFecha.setText("");
