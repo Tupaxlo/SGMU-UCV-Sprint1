@@ -1,17 +1,26 @@
 package vista;
 
+import modelo.ConexionBD;
 import modelo.Usuario;
 
 import javax.swing.*;
 import java.awt.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class VistaLogin extends JFrame {
     private final List<Usuario> usuariosRegistrados;
+    private Usuario usuarioSesionActual;
+    private JComboBox<String> selectorRolRegistro;
 
     public VistaLogin() {
         usuariosRegistrados = new ArrayList<>();
+        cargarUsuariosDesdeBD();
+        actualizarRolesRegistro();
 
         setTitle("Login de pasajeros y administradores");
         setSize(600, 500);
@@ -27,6 +36,40 @@ public class VistaLogin extends JFrame {
 
         panelPrincipal.add(pestanias, BorderLayout.CENTER);
         add(panelPrincipal);
+    }
+
+    private void cargarUsuariosDesdeBD() {
+        try (Connection conexion = ConexionBD.abrirConexion();
+             PreparedStatement stmt = conexion.prepareStatement("SELECT cedula, nombre, correo, clave, rol FROM usuarios");
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                usuariosRegistrados.add(new Usuario(
+                        rs.getString("cedula"),
+                        rs.getString("nombre"),
+                        rs.getString("correo"),
+                        rs.getString("clave"),
+                        rs.getString("rol")
+                ));
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "No se pudo cargar la base de datos de usuarios.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void guardarUsuarioEnBD(Usuario usuario) {
+        try (Connection conexion = ConexionBD.abrirConexion();
+             PreparedStatement stmt = conexion.prepareStatement(
+                     "INSERT INTO usuarios (cedula, nombre, correo, clave, rol) VALUES (?, ?, ?, ?, ?)")) {
+            stmt.setString(1, usuario.getCedula());
+            stmt.setString(2, usuario.getNombre());
+            stmt.setString(3, usuario.getCorreo());
+            stmt.setString(4, usuario.getClave());
+            stmt.setString(5, usuario.getRol());
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "No se pudo guardar el usuario en la base de datos.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private JPanel crearPanelRegistro() {
@@ -54,10 +97,9 @@ public class VistaLogin extends JFrame {
         panelRegistro.add(campoClave);
 
         JLabel etiquetaRol = new JLabel("Rol:");
-        String[] roles = {"Pasajero", "Administrador"};
-        JComboBox<String> selectorRol = new JComboBox<>(roles);
+        selectorRolRegistro = new JComboBox<>(obtenerRolesDisponibles());
         panelRegistro.add(etiquetaRol);
-        panelRegistro.add(selectorRol);
+        panelRegistro.add(selectorRolRegistro);
 
         JButton botonRegistrar = new JButton("Registrarse");
         panelRegistro.add(new JLabel(""));
@@ -68,7 +110,7 @@ public class VistaLogin extends JFrame {
             String nombre = campoNombre.getText().trim();
             String correo = campoCorreo.getText().trim();
             String clave = new String(campoClave.getPassword()).trim();
-            String rol = (String) selectorRol.getSelectedItem();
+            String rol = (String) selectorRolRegistro.getSelectedItem();
 
             if (cedula.isEmpty() || nombre.isEmpty() || correo.isEmpty() || clave.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Debe completar todos los campos antes de registrarse.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -76,12 +118,17 @@ public class VistaLogin extends JFrame {
             }
 
             if (!correoValido(correo)) {
-                JOptionPane.showMessageDialog(this, "El correo electrónico no tiene un formato válido.", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "El correo debe terminar en @gmail.com o @hotmail.com.", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
             if (clave.length() < 6) {
                 JOptionPane.showMessageDialog(this, "La contraseña debe tener al menos 6 caracteres.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            if ("Administrador".equalsIgnoreCase(rol) && (usuarioSesionActual == null || !"Administrador".equalsIgnoreCase(usuarioSesionActual.getRol()))) {
+                JOptionPane.showMessageDialog(this, "Solo un administrador autenticado puede registrar otro administrador.", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
@@ -91,11 +138,12 @@ public class VistaLogin extends JFrame {
             }
 
             usuariosRegistrados.add(new Usuario(cedula, nombre, correo, clave, rol));
+            guardarUsuarioEnBD(new Usuario(cedula, nombre, correo, clave, rol));
             campoCedula.setText("");
             campoNombre.setText("");
             campoCorreo.setText("");
             campoClave.setText("");
-            selectorRol.setSelectedIndex(0);
+            selectorRolRegistro.setSelectedIndex(0);
 
             JOptionPane.showMessageDialog(this, "Usuario registrado correctamente.");
         });
@@ -137,12 +185,20 @@ public class VistaLogin extends JFrame {
                 return;
             }
 
+            if (!correoValido(correo)) {
+                JOptionPane.showMessageDialog(this, "El correo debe terminar en @gmail.com o @hotmail.com.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
             Usuario usuarioAutenticado = buscarUsuario(correo, clave, rol);
 
             if (usuarioAutenticado == null) {
                 JOptionPane.showMessageDialog(this, "Credenciales incorrectas o rol no válido para este usuario.", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
+
+            usuarioSesionActual = usuarioAutenticado;
+            actualizarRolesRegistro();
 
             campoCorreo.setText("");
             campoClave.setText("");
@@ -154,8 +210,24 @@ public class VistaLogin extends JFrame {
         return panelInicioSesion;
     }
 
+    private String[] obtenerRolesDisponibles() {
+        if (usuarioSesionActual != null && "Administrador".equalsIgnoreCase(usuarioSesionActual.getRol())) {
+            return new String[]{"Pasajero", "Administrador"};
+        }
+        return new String[]{"Pasajero"};
+    }
+
+    private void actualizarRolesRegistro() {
+        if (selectorRolRegistro == null) {
+            return;
+        }
+
+        selectorRolRegistro.setModel(new DefaultComboBoxModel<>(obtenerRolesDisponibles()));
+        selectorRolRegistro.setSelectedIndex(0);
+    }
+
     private boolean correoValido(String correo) {
-        return correo.matches("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
+        return correo.matches("(?i)^[A-Za-z0-9._%+-]+@(gmail\\.com|hotmail\\.com)$");
     }
 
     private boolean usuarioExiste(String correo, String cedula) {
