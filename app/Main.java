@@ -10,12 +10,10 @@ public class Main {
         SwingUtilities.invokeLater(() -> {
             try {
                 UIManager.setLookAndFeel(
-                    UIManager.getSystemLookAndFeelClassName()
-                );
+                        UIManager.getSystemLookAndFeelClassName());
             } catch (Exception e) {
                 System.out.println(
-                    "Se utilizará el estilo predeterminado."
-                );
+                        "Se utilizará el estilo predeterminado.");
             }
 
             VistaMonedero ventana = new VistaMonedero();
