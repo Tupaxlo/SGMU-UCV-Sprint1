@@ -29,4 +29,14 @@ public class Monedero {
 
         saldo = saldo.add(monto);
     }
+
+    public void descontar(BigDecimal monto) {
+        if (monto == null || monto.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("El monto a descontar debe ser mayor que cero.");
+        }
+        if (saldo.compareTo(monto) < 0) {
+            throw new IllegalArgumentException("Saldo insuficiente en el monedero.");
+        }
+        saldo = saldo.subtract(monto);
+    }
 }

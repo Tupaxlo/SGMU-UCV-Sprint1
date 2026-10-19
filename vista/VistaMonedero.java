@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 public class VistaMonedero extends JFrame {
 
     private final Monedero monedero;
+    private final VistaPrincipal vistaPadre;
     private final ServicioRecarga servicio;
 
     private JTextField txtMonto;
@@ -18,13 +19,15 @@ public class VistaMonedero extends JFrame {
     private JTextField txtReferencia;
     private JLabel lblSaldo;
 
-    public VistaMonedero() {
-        monedero = new Monedero("USUARIO-001");
-        servicio = new ServicioRecarga();
+    public VistaMonedero(Monedero monederoCompartido, VistaPrincipal padre) {
+        this.monedero = monederoCompartido;
+        this.vistaPadre = padre;
+        this.servicio = new ServicioRecarga();
 
-        setTitle("SGTU-UCV - Monedero Virtual");
+        setTitle("Recarga de Monedero");
         setSize(480, 440);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        // IMPORTANTE: DISPOSE para que no apague todo el sistema al cerrar la X
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); 
         setLocationRelativeTo(null);
 
         construirInterfaz();
