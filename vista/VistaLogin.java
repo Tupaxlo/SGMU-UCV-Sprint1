@@ -1,6 +1,7 @@
 package vista;
 
 import modelo.ConexionBD;
+import modelo.Monedero;
 import modelo.Usuario;
 
 import javax.swing.*;
@@ -16,6 +17,7 @@ public class VistaLogin extends JFrame {
     private final List<Usuario> usuariosRegistrados;
     private Usuario usuarioSesionActual;
     private JComboBox<String> selectorRolRegistro;
+    private JTabbedPane pestanias;
 
     public VistaLogin() {
         usuariosRegistrados = new ArrayList<>();
@@ -30,7 +32,7 @@ public class VistaLogin extends JFrame {
         JPanel panelPrincipal = new JPanel(new BorderLayout(15, 15));
         panelPrincipal.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        JTabbedPane pestanias = new JTabbedPane();
+        pestanias = new JTabbedPane();
         pestanias.addTab("Registro", crearPanelRegistro());
         pestanias.addTab("Inicio de sesión", crearPanelInicioSesion());
 
@@ -211,6 +213,12 @@ public class VistaLogin extends JFrame {
                 VistaTarifa ventanaTarifa = new VistaTarifa();
                 ventanaTarifa.setVisible(true);
                 return;
+            }
+
+            if ("Pasajero".equalsIgnoreCase(usuarioAutenticado.getRol())) {
+                this.dispose();
+                VistaMonedero ventanaMonedero = new VistaMonedero(new Monedero("USUARIO-001"), null);
+                ventanaMonedero.setVisible(true);
             }
         });
 

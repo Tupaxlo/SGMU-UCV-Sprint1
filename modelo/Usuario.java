@@ -16,6 +16,7 @@ public class Usuario {
     }
 
     public String getCSedula() { return cedula; }
+    public String getCedula() { return cedula; }
     public String getNombre() { return nombre; }
     public String getCorreo() { return correo; }
     public String getClave() { return clave; }

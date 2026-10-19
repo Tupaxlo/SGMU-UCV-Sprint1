@@ -42,6 +42,7 @@ public class ConexionBD {
             );
 
             insertarUsuarioAdminBase(stmt);
+            insertarUsuarioPasajeroBase(stmt);
             insertarTarifasBase(stmt);
         }
     }
@@ -50,6 +51,14 @@ public class ConexionBD {
         java.sql.ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM usuarios WHERE correo = 'admin@gmail.com'");
         if (rs.next() && rs.getInt(1) == 0) {
             stmt.executeUpdate("INSERT INTO usuarios (cedula, nombre, correo, clave, rol) VALUES ('10000001', 'Administrador Principal', 'admin@gmail.com', 'admin123', 'Administrador')");
+        }
+        rs.close();
+    }
+
+    private static void insertarUsuarioPasajeroBase(Statement stmt) throws SQLException {
+        java.sql.ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM usuarios WHERE correo = 'pasajero@gmail.com'");
+        if (rs.next() && rs.getInt(1) == 0) {
+            stmt.executeUpdate("INSERT INTO usuarios (cedula, nombre, correo, clave, rol) VALUES ('20000002', 'Pasajero Demo', 'pasajero@gmail.com', 'pass123', 'Pasajero')");
         }
         rs.close();
     }

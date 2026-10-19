@@ -12,7 +12,7 @@ public class Itinerario {
         this.ruta = ruta;
         this.fecha = fecha;
         this.hora = hora;
-        this.vehiculoAsignado = vehiculoAsignado;S
+        this.vehiculoAsignado = vehiculoAsignado;
     }
 
     // Getters

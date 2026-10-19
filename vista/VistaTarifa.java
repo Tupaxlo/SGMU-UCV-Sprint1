@@ -11,6 +11,7 @@ import java.util.List;
 public class VistaTarifa extends JFrame {
     private final List<Tarifa> tarifas;
     private final DefaultTableModel modeloTabla;
+    private JPanel panelContenido;
 
     public VistaTarifa() {
         tarifas = new ArrayList<>();
@@ -23,6 +24,7 @@ public class VistaTarifa extends JFrame {
         setLocationRelativeTo(null);
         setLayout(new BorderLayout(10, 10));
 
+        panelContenido = new JPanel(new BorderLayout(10, 10));
         JPanel panelFormulario = new JPanel(new GridLayout(5, 2, 10, 10));
         panelFormulario.setBorder(BorderFactory.createTitledBorder("Configurar tarifa para ruta extraurbana"));
 
@@ -44,14 +46,16 @@ public class VistaTarifa extends JFrame {
         panelFormulario.add(new JLabel(""));
         panelFormulario.add(btnGuardar);
 
-        add(panelFormulario, BorderLayout.NORTH);
+        panelContenido.add(panelFormulario, BorderLayout.NORTH);
 
         String[] columnas = {"Tipo de usuario", "Tipo de ruta", "Monto"};
         modeloTabla = new DefaultTableModel(columnas, 0);
         cargarTarifasIniciales();
 
         JTable tablaTarifas = new JTable(modeloTabla);
-        add(new JScrollPane(tablaTarifas), BorderLayout.CENTER);
+        panelContenido.add(new JScrollPane(tablaTarifas), BorderLayout.CENTER);
+
+        add(panelContenido);
 
         btnGuardar.addActionListener(e -> {
             String tipoUsuario = (String) comboTipoUsuario.getSelectedItem();
@@ -108,6 +112,10 @@ public class VistaTarifa extends JFrame {
             }
         }
         return null;
+    }
+
+    public JPanel getPanelTarifa() {
+        return panelContenido;
     }
 
     public static void main(String[] args) {

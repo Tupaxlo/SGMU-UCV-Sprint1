@@ -2,7 +2,7 @@ package app;
 
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
-import vista.VistaPrincipal;
+import vista.VistaPrincipalSistema;
 
 public class Main {
 
@@ -14,9 +14,8 @@ public class Main {
                 System.out.println("Se utilizará el estilo predeterminado.");
             }
 
-            // Arrancamos directamente el Panel Central
-            VistaPrincipal menuCentral = new VistaPrincipal();
-            menuCentral.setVisible(true);
+            VistaPrincipalSistema sistema = new VistaPrincipalSistema();
+            sistema.setVisible(true);
         });
     }
 }
