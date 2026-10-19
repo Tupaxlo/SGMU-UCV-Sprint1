@@ -13,12 +13,10 @@ public class Vehiculo {
         this.estado = estado;
     }
 
-    // Getters
     public String getPlaca() { return placa; }
     public String getModelo() { return modelo; }
     public int getCapacidad() { return capacidad; }
     public String getEstado() { return estado; }
     
-    // Setters (Para la prueba unitaria)
     public void setEstado(String estado) { this.estado = estado; }
 }

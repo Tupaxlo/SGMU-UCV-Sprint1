@@ -44,3 +44,4 @@ public class PruebasCajaNegraTest {
         assertFalse(esInvalido, "El puesto 31 debe ser rechazado por exceder la capacidad.");
     }
 }
+
