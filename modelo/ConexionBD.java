@@ -6,7 +6,15 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 public class ConexionBD {
-    private static final String URL = "jdbc:sqlite:sgmu.db";
+    private static final String URL = "jdbc:sqlite:./sgmu.db";
+
+    static {
+        try {
+            Class.forName("org.sqlite.JDBC");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException("No se encontró el driver SQLite.", e);
+        }
+    }
 
     public static Connection abrirConexion() throws SQLException {
         Connection conexion = DriverManager.getConnection(URL);

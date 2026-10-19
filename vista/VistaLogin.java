@@ -53,7 +53,7 @@ public class VistaLogin extends JFrame {
                 ));
             }
         } catch (SQLException e) {
-            JOptionPane.showMessageDialog(this, "No se pudo cargar la base de datos de usuarios.", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "No se pudo cargar la base de datos de usuarios: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -68,7 +68,7 @@ public class VistaLogin extends JFrame {
             stmt.setString(5, usuario.getRol());
             stmt.executeUpdate();
         } catch (SQLException e) {
-            JOptionPane.showMessageDialog(this, "No se pudo guardar el usuario en la base de datos.", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "No se pudo guardar el usuario en la base de datos: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -205,6 +205,13 @@ public class VistaLogin extends JFrame {
             selectorRol.setSelectedIndex(0);
 
             JOptionPane.showMessageDialog(this, "Bienvenido, " + usuarioAutenticado.getNombre() + ". Ha iniciado sesión como " + usuarioAutenticado.getRol() + ".");
+
+            if ("Administrador".equalsIgnoreCase(usuarioAutenticado.getRol())) {
+                this.dispose();
+                VistaTarifa ventanaTarifa = new VistaTarifa();
+                ventanaTarifa.setVisible(true);
+                return;
+            }
         });
 
         return panelInicioSesion;
