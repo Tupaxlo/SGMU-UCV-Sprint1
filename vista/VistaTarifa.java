@@ -5,18 +5,14 @@ import modelo.Tarifa;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.List;
 
 public class VistaTarifa extends JFrame {
-    private final List<Tarifa> tarifas;
     private final DefaultTableModel modeloTabla;
     private JPanel panelContenido;
 
     public VistaTarifa() {
-        tarifas = new ArrayList<>();
-        tarifas.add(new Tarifa("Comunidad Universitaria", "Extraurbana", 2.50));
-        tarifas.add(new Tarifa("Público General", "Extraurbana", 5.00));
+        Tarifa.cargarBaseInicial();
 
         setTitle("Configuración de Tarifas - SGMU-UCV");
         setSize(650, 450);
@@ -50,7 +46,7 @@ public class VistaTarifa extends JFrame {
 
         String[] columnas = {"Tipo de usuario", "Tipo de ruta", "Monto"};
         modeloTabla = new DefaultTableModel(columnas, 0);
-        cargarTarifasIniciales();
+        actualizarTabla();
 
         JTable tablaTarifas = new JTable(modeloTabla);
         panelContenido.add(new JScrollPane(tablaTarifas), BorderLayout.CENTER);
@@ -75,13 +71,8 @@ public class VistaTarifa extends JFrame {
                     return;
                 }
 
-                Tarifa tarifaExistente = buscarTarifa(tipoUsuario, tipoRuta);
-                if (tarifaExistente != null) {
-                    tarifaExistente.setMonto(monto);
-                } else {
-                    tarifas.add(new Tarifa(tipoUsuario, tipoRuta, monto));
-                }
-
+                Tarifa nuevaTarifa = new Tarifa(tipoUsuario, tipoRuta, monto);
+                Tarifa.registrar(nuevaTarifa);
                 actualizarTabla();
                 txtMonto.setText("");
                 JOptionPane.showMessageDialog(this, "Tarifa guardada correctamente.");
@@ -91,27 +82,12 @@ public class VistaTarifa extends JFrame {
         });
     }
 
-    private void cargarTarifasIniciales() {
-        for (Tarifa tarifa : tarifas) {
-            modeloTabla.addRow(new Object[]{tarifa.getTipoUsuario(), tarifa.getTipoRuta(), tarifa.getMonto()});
-        }
-    }
-
     private void actualizarTabla() {
         modeloTabla.setRowCount(0);
+        List<Tarifa> tarifas = Tarifa.getTarifasRegistradas();
         for (Tarifa tarifa : tarifas) {
             modeloTabla.addRow(new Object[]{tarifa.getTipoUsuario(), tarifa.getTipoRuta(), tarifa.getMonto()});
         }
-    }
-
-    private Tarifa buscarTarifa(String tipoUsuario, String tipoRuta) {
-        for (Tarifa tarifa : tarifas) {
-            if (tarifa.getTipoUsuario().equalsIgnoreCase(tipoUsuario)
-                    && tarifa.getTipoRuta().equalsIgnoreCase(tipoRuta)) {
-                return tarifa;
-            }
-        }
-        return null;
     }
 
     public JPanel getPanelTarifa() {

@@ -3,6 +3,8 @@ package vista;
 import modelo.ConexionBD;
 import modelo.Monedero;
 import modelo.Usuario;
+import modelo.Vehiculo;
+import modelo.Itinerario;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -375,23 +377,60 @@ public class VistaPrincipalSistema extends JFrame {
         formulario.add(estado);
 
         JButton guardar = new JButton("Registrar vehículo");
-        formulario.add(new JLabel(""));
+        JButton eliminar = new JButton("Eliminar vehículo");
         formulario.add(guardar);
+        formulario.add(eliminar);
 
         String[] columnas = {"Placa", "Modelo", "Capacidad", "Estado"};
         DefaultTableModel modeloTabla = new DefaultTableModel(columnas, 0);
         JTable tabla = new JTable(modeloTabla);
         tabla.setRowHeight(26);
 
+        for (Vehiculo vehiculo : Vehiculo.getFlotaRegistrada()) {
+            modeloTabla.addRow(new Object[]{vehiculo.getPlaca(), vehiculo.getModelo(), vehiculo.getCapacidad(), vehiculo.getEstado()});
+        }
+
         guardar.addActionListener(e -> {
             if (placa.getText().trim().isEmpty() || modelo.getText().trim().isEmpty() || capacidad.getText().trim().isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Complete todos los campos del vehículo.", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-            modeloTabla.addRow(new Object[]{placa.getText().trim(), modelo.getText().trim(), capacidad.getText().trim(), estado.getSelectedItem()});
-            placa.setText("");
-            modelo.setText("");
-            capacidad.setText("");
+
+            try {
+                int capacidadNum = Integer.parseInt(capacidad.getText().trim());
+                if (capacidadNum <= 0) {
+                    JOptionPane.showMessageDialog(this, "La capacidad debe ser mayor que 0.", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                if (!Vehiculo.placaUnica(placa.getText().trim())) {
+                    JOptionPane.showMessageDialog(this, "La placa ya existe en la flota.", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                Vehiculo nuevoVehiculo = new Vehiculo(placa.getText().trim(), modelo.getText().trim(), capacidadNum, (String) estado.getSelectedItem());
+                Vehiculo.registrar(nuevoVehiculo);
+                modeloTabla.addRow(new Object[]{nuevoVehiculo.getPlaca(), nuevoVehiculo.getModelo(), nuevoVehiculo.getCapacidad(), nuevoVehiculo.getEstado()});
+                placa.setText("");
+                modelo.setText("");
+                capacidad.setText("");
+                estado.setSelectedIndex(0);
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "La capacidad debe ser un número válido.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+        eliminar.addActionListener(e -> {
+            int filaSeleccionada = tabla.getSelectedRow();
+            if (filaSeleccionada < 0) {
+                JOptionPane.showMessageDialog(this, "Seleccione un vehículo para eliminar.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            String placaEliminar = (String) modeloTabla.getValueAt(filaSeleccionada, 0);
+            Vehiculo.eliminar(placaEliminar);
+            modeloTabla.removeRow(filaSeleccionada);
+            JOptionPane.showMessageDialog(this, "Vehículo eliminado correctamente.", "Información", JOptionPane.INFORMATION_MESSAGE);
         });
 
         panel.add(formulario, BorderLayout.NORTH);
@@ -411,6 +450,7 @@ public class VistaPrincipalSistema extends JFrame {
         JTextField fecha = new JTextField();
         JTextField hora = new JTextField();
         JTextField placa = new JTextField();
+        JTextField chofer = new JTextField();
 
         formulario.add(new JLabel("ID:"));
         formulario.add(id);
@@ -422,27 +462,85 @@ public class VistaPrincipalSistema extends JFrame {
         formulario.add(hora);
         formulario.add(new JLabel("Placa vehículo:"));
         formulario.add(placa);
+        formulario.add(new JLabel("Chofer asignado:"));
+        formulario.add(chofer);
 
         JButton guardar = new JButton("Registrar itinerario");
         formulario.add(new JLabel(""));
         formulario.add(guardar);
 
-        String[] columnas = {"ID", "Ruta", "Fecha", "Hora", "Vehículo"};
+        String[] columnas = {"ID", "Ruta", "Fecha", "Hora", "Vehículo", "Chofer"};
         DefaultTableModel modeloTabla = new DefaultTableModel(columnas, 0);
         JTable tabla = new JTable(modeloTabla);
         tabla.setRowHeight(26);
 
+        for (Itinerario itinerario : Itinerario.getItinerariosRegistrados()) {
+            modeloTabla.addRow(new Object[]{
+                itinerario.getId(),
+                itinerario.getRuta(),
+                itinerario.getFecha(),
+                itinerario.getHora(),
+                itinerario.getVehiculoAsignado() != null ? itinerario.getVehiculoAsignado().getPlaca() : "",
+                itinerario.getChoferAsignado()
+            });
+        }
+
         guardar.addActionListener(e -> {
-            if (id.getText().trim().isEmpty() || ruta.getText().trim().isEmpty() || fecha.getText().trim().isEmpty() || hora.getText().trim().isEmpty() || placa.getText().trim().isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Debe completar todos los campos del itinerario.", "Error", JOptionPane.ERROR_MESSAGE);
+            if (id.getText().trim().isEmpty() || ruta.getText().trim().isEmpty() || fecha.getText().trim().isEmpty() || hora.getText().trim().isEmpty() || placa.getText().trim().isEmpty() || chofer.getText().trim().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Debe completar todos los campos del itinerario, incluido el chofer.", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-            modeloTabla.addRow(new Object[]{id.getText().trim(), ruta.getText().trim(), fecha.getText().trim(), hora.getText().trim(), placa.getText().trim()});
+
+            if (!Itinerario.esRutaValida(ruta.getText())) {
+                JOptionPane.showMessageDialog(this, "La ruta debe tener al menos 3 caracteres.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            if (!Itinerario.esFechaValida(fecha.getText())) {
+                JOptionPane.showMessageDialog(this, "La fecha debe tener formato yyyy-MM-dd.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            if (!Itinerario.esHoraValida(hora.getText())) {
+                JOptionPane.showMessageDialog(this, "La hora debe tener formato HH:mm.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            if (!Vehiculo.existePlaca(placa.getText().trim())) {
+                JOptionPane.showMessageDialog(this, "La placa del vehículo no existe en la flota registrada.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            if (Itinerario.existeId(id.getText(), Itinerario.getItinerariosRegistrados())) {
+                JOptionPane.showMessageDialog(this, "El ID del itinerario ya existe.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            Vehiculo vehiculoAsignado = null;
+            for (Vehiculo vehiculo : Vehiculo.getFlotaRegistrada()) {
+                if (vehiculo.getPlaca().equalsIgnoreCase(placa.getText().trim())) {
+                    vehiculoAsignado = vehiculo;
+                    break;
+                }
+            }
+
+            Itinerario nuevoItinerario = new Itinerario(id.getText().trim(), ruta.getText().trim(), fecha.getText().trim(), hora.getText().trim(), vehiculoAsignado, chofer.getText().trim());
+            Itinerario.registrar(nuevoItinerario);
+            modeloTabla.addRow(new Object[]{
+                nuevoItinerario.getId(),
+                nuevoItinerario.getRuta(),
+                nuevoItinerario.getFecha(),
+                nuevoItinerario.getHora(),
+                nuevoItinerario.getVehiculoAsignado().getPlaca(),
+                nuevoItinerario.getChoferAsignado()
+            });
+
             id.setText("");
             ruta.setText("");
             fecha.setText("");
             hora.setText("");
             placa.setText("");
+            chofer.setText("");
         });
 
         panel.add(formulario, BorderLayout.NORTH);

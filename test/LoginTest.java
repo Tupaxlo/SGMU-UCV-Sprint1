@@ -22,17 +22,17 @@ public class LoginTest {
         List<Usuario> usuariosRegistrados = (List<Usuario>) campoUsuariosRegistrados.get(vistaLogin);
         usuariosRegistrados.clear();
 
-        Usuario usuarioPasajero = new Usuario("12345678", "Ana López", "ana@correo.com", "clave123", "Pasajero");
+        Usuario usuarioPasajero = new Usuario("12345678", "Ana López", "ana@gmail.com", "clave123", "Pasajero");
         usuariosRegistrados.add(usuarioPasajero);
 
         Method metodoCorreoValido = VistaLogin.class.getDeclaredMethod("correoValido", String.class);
         metodoCorreoValido.setAccessible(true);
-        assertTrue((boolean) metodoCorreoValido.invoke(vistaLogin, "ana@correo.com"));
+        assertTrue((boolean) metodoCorreoValido.invoke(vistaLogin, "ana@gmail.com"));
 
         Method metodoBuscarUsuario = VistaLogin.class.getDeclaredMethod("buscarUsuario", String.class, String.class, String.class);
         metodoBuscarUsuario.setAccessible(true);
 
-        Usuario usuarioAutenticado = (Usuario) metodoBuscarUsuario.invoke(vistaLogin, "ana@correo.com", "clave123", "Pasajero");
+        Usuario usuarioAutenticado = (Usuario) metodoBuscarUsuario.invoke(vistaLogin, "ana@gmail.com", "clave123", "Pasajero");
 
         assertNotNull(usuarioAutenticado, "Debe encontrar al usuario registrado con sus credenciales.");
         assertEquals("Ana López", usuarioAutenticado.getNombre(), "El nombre del usuario autenticado debe coincidir.");
@@ -46,7 +46,8 @@ public class LoginTest {
         Method metodoCorreoValido = VistaLogin.class.getDeclaredMethod("correoValido", String.class);
         metodoCorreoValido.setAccessible(true);
 
-        assertTrue((boolean) metodoCorreoValido.invoke(vistaLogin, "admin@empresa.com"));
+        assertTrue((boolean) metodoCorreoValido.invoke(vistaLogin, "admin@gmail.com"));
+        assertTrue((boolean) metodoCorreoValido.invoke(vistaLogin, "admin@hotmail.com"));
         assertFalse((boolean) metodoCorreoValido.invoke(vistaLogin, "correo-invalido"));
 
         Method metodoBuscarUsuario = VistaLogin.class.getDeclaredMethod("buscarUsuario", String.class, String.class, String.class);
